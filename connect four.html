@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connect Four - 2 Player</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+  * { box-sizing: border-box; }
+  body {
+    background: radial-gradient(circle at top, #0f0c29, #302b63, #24243e);
+    font-family: 'Poppins', sans-serif;
+    color: #fff;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+  h1 {
+    font-size: 2.5rem;
+    background: linear-gradient(90deg,#00ffff,#ff00cc);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+    animation: glow 3s infinite alternate;
+  }
+  @keyframes glow {
+    from { text-shadow: 0 0 10px #00ffff; }
+    to { text-shadow: 0 0 25px #ff00cc; }
+  }
+  #board {
+    display: grid;
+    grid-template-columns: repeat(7, 80px);
+    grid-template-rows: repeat(6, 80px);
+    gap: 8px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 10px;
+    box-shadow: 0 0 25px rgba(0,255,255,0.4);
+  }
+  .cell {
+    width: 80px;
+    height: 80px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .cell:hover { transform: translateY(-5px) scale(1.05); }
+  .red { background: radial-gradient(circle, #ff5050, #c00000); box-shadow: 0 0 15px #ff5050; }
+  .yellow { background: radial-gradient(circle, #ffff66, #ffaa00); box-shadow: 0 0 15px #ffff66; }
+  #status {
+    margin-top: 25px;
+    font-size: 1.3rem;
+    min-height: 30px;
+  }
+  #restart {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: linear-gradient(90deg,#00ffff,#0077ff);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    display: none;
+    transition: 0.3s;
+  }
+  #restart:hover { transform: scale(1.1); }
+</style>
+</head>
+<body>
+  <h1>Connect Four</h1>
+  <div id="board"></div>
+  <div id="status">Player 1 (🔴) – Your Turn</div>
+  <button id="restart">Play Again</button>
+
+<script>
+const rows = 6, cols = 7;
+let board = Array(rows).fill(null).map(()=>Array(cols).fill(null));
+let currentPlayer = 'red';
+const boardEl = document.getElementById('board');
+const statusEl = document.getElementById('status');
+const restartBtn = document.getElementById('restart');
+
+function createBoard(){
+  boardEl.innerHTML='';
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const cell=document.createElement('div');
+      cell.classList.add('cell');
+      cell.dataset.row=r;
+      cell.dataset.col=c;
+      cell.addEventListener('click',()=>handleClick(c));
+      boardEl.appendChild(cell);
+    }
+  }
+}
+createBoard();
+
+function handleClick(col){
+  for(let r=rows-1;r>=0;r--){
+    if(!board[r][col]){
+      board[r][col]=currentPlayer;
+      const cell=document.querySelector(`.cell[data-row='${r}'][data-col='${col}']`);
+      cell.classList.add(currentPlayer);
+      if(checkWin(r,col)){
+        statusEl.innerHTML=`🎉 Player ${currentPlayer==='red'?1:2} (${currentPlayer==='red'?'🔴':'🟡'}) Wins!`;
+        document.querySelectorAll('.cell').forEach(c=>c.style.pointerEvents='none');
+        restartBtn.style.display='block';
+        return;
+      }
+      if(board.flat().every(Boolean)){
+        statusEl.innerHTML='🤝 Draw!';
+        restartBtn.style.display='block';
+        return;
+      }
+      currentPlayer=currentPlayer==='red'?'yellow':'red';
+      statusEl.innerHTML=`Player ${currentPlayer==='red'?1:2} (${currentPlayer==='red'?'🔴':'🟡'}) – Your Turn`;
+      return;
+    }
+  }
+}
+
+function checkWin(r,c){
+  const dirs=[[0,1],[1,0],[1,1],[1,-1]];
+  for(let [dr,dc] of dirs){
+    let count=1;
+    count+=countDir(r,c,dr,dc);
+    count+=countDir(r,c,-dr,-dc);
+    if(count>=4) return true;
+  }
+  return false;
+}
+
+function countDir(r,c,dr,dc){
+  let cnt=0,nr=r+dr,nc=c+dc;
+  while(nr>=0&&nr<rows&&nc>=0&&nc<cols&&board[nr][nc]===currentPlayer){
+    cnt++; nr+=dr; nc+=dc;
+  }
+  return cnt;
+}
+
+restartBtn.addEventListener('click',()=>{
+  board=Array(rows).fill(null).map(()=>Array(cols).fill(null));
+  currentPlayer='red';
+  createBoard();
+  statusEl.innerHTML='Player 1 (🔴) – Your Turn';
+  restartBtn.style.display='none';
+});
+</script>
+</body>
+</html>

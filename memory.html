@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Puzzle — Fancy</title>
+<style>
+    .tile {
+  perspective: 800px;
+  width: 80px;
+  height: 80px;
+  cursor: pointer;
+  position: relative;
+}
+
+.card {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  transform-style: preserve-3d;
+  transition: transform 0.5s;
+  position: relative;
+}
+
+.card.flipped {
+  transform: rotateY(180deg);
+}
+
+.front, .back {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: bold;
+  backface-visibility: hidden; /* hides the hidden side */
+}
+
+.front {
+  background: linear-gradient(180deg, rgba(180, 37, 37, 0.663), transparent);
+  color: #000000;
+  z-index: 2; /* ensure front is on top initially */
+}
+
+.back {
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transform: rotateY(180deg);
+  color: #5b94ad;
+  z-index: 1;
+}
+
+
+  :root {
+    --bg: #45832c;
+    --card: #0b1220;
+    --accent: #ff7ab6;
+    --accent2: #06b6d4;
+    --muted: #d53a06;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Inter, sans-serif; background: var(--bg); color: #17edcd; display: flex; justify-content: center; align-items: center; height: 100vh; }
+  .container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+  .board { display: grid; gap: 12px; }
+  .tile { perspective: 800px; width: 80px; height: 80px; cursor: pointer; }
+  .card { width: 100%; height: 100%; border-radius: 12px; background: linear-gradient(180deg, rgb(99, 48, 48), transparent); display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; color: #5c4ca6; transform-style: preserve-3d; transition: transform 0.5s; }
+  .card.flipped { transform: rotateY(180deg); }
+  .back { transform: rotateY(180deg); position: absolute; inset: 0; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+  .front { position: absolute; inset: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; backface-visibility: hidden; }
+  .stats { display: flex; gap: 15px; margin-bottom: 12px; justify-content: center; }
+  .stat { background: rgba(102, 38, 38, 0.625); padding: 10px; border-radius: 10px; text-align: center; }
+  button { padding: 8px 12px; border-radius: 8px; border: none; cursor: pointer; background: var(--accent); color: #000000; font-weight: bold; }
+</style>
+
+</head>
+<body>
+  <div style="margin-top:-500px">
+        <div style="margin-bottom:20px;font-weight:750;color:#06b6d4;position:sticky;">SQUID GAMES REPRESENTS - MEMORY GAME:</div>
+      </div>
+<div class="container">
+  <div style="display:flex;flex-direction:column;align-items:flex-start;position:relative">
+    <h1>Memory Puzzle — Fancy</h1>
+    <div class="stats">
+      <div class="stat">Moves: <span id="moves">0</span></div>
+      <div class="stat">Pairs: <span id="pairs">0/0</span></div>
+      <div class="stat">Time: <span id="time">00:00</span></div>
+    </div>
+    <div style="margin-bottom:12px">
+      <button id="restart">Restart</button>
+    </div>
+    <div id="board" class="board"></div>
+  </div>
+</div>
+ <div style="margin-top:550px">
+    <div style="margin-bottom:5px;font-weight:190;color: #1319be;">Created By : MR.MINKI</div>
+  </div>
+<script>
+const boardEl = document.getElementById('board');
+const movesEl = document.getElementById('moves');
+const pairsEl = document.getElementById('pairs');
+const timeEl = document.getElementById('time');
+const restartBtn = document.getElementById('restart');
+
+const EMOJIS = ['🍎','🍌','🍇','🍒','🍓','🍍','🥝','🍑','🍉','🍋','🥥','🍐','🍊','🥭','🍈','🍅'];
+let rows = 4, cols = 4;
+let deck = [], first = null, second = null, lock = false;
+let moves = 0, matched = 0, totalPairs = 0, startTime = null, timer = null;
+
+function formatTime(s){ const mm = String(Math.floor(s/60)).padStart(2,'0'); const ss = String(s%60).padStart(2,'0'); return `${mm}:${ss}`; }
+
+function startTimer(){ if(timer) clearInterval(timer); startTime = Date.now(); timer = setInterval(()=>{ timeEl.textContent = formatTime(Math.floor((Date.now()-startTime)/1000)); }, 300); }
+function stopTimer(){ if(timer) clearInterval(timer); timer=null; }
+
+function buildDeck(){ totalPairs = (rows*cols)/2; const pick = EMOJIS.slice(0).sort(()=>Math.random()-0.5).slice(0,totalPairs); deck = pick.concat(pick).sort(()=>Math.random()-0.5); matched = 0; moves = 0; updateStats(); }
+
+function updateStats(){ movesEl.textContent = moves; pairsEl.textContent = `${matched}/${totalPairs}`; }
+
+function renderBoard(){ boardEl.innerHTML=''; boardEl.style.gridTemplateColumns = `repeat(${cols},1fr)`;
+deck.forEach((val,i)=>{
+const tile = document.createElement('div'); tile.className='tile';
+const card = document.createElement('div'); card.className='card';
+const front = document.createElement('div'); front.className='front'; front.textContent='?';
+const back = document.createElement('div'); back.className='back'; back.textContent=val;
+card.appendChild(front); card.appendChild(back); tile.appendChild(card); boardEl.appendChild(tile);
+card.addEventListener('click', ()=>flipCard(card,i));
+});
+}
+
+function flipCard(card,i){ if(lock || card.classList.contains('flipped')) return; if(!startTime) startTimer();
+card.classList.add('flipped');
+if(!first){ first = {card,i}; } else { second = {card,i}; lock = true; moves++; updateStats(); setTimeout(checkMatch, 700); }
+}
+
+function checkMatch(){ if(deck[first.i] === deck[second.i]){ matched++; first.card.style.visibility='hidden'; second.card.style.visibility='hidden'; }
+else { first.card.classList.remove('flipped'); second.card.classList.remove('flipped'); }
+first = null; second = null; lock = false; updateStats(); if(matched === totalPairs){ stopTimer(); setTimeout(()=>alert(`You win! ${moves} moves in ${timeEl.textContent}`), 300); }
+}
+
+function startGame(r=4,c=4){ rows=r; cols=c; buildDeck(); renderBoard(); stopTimer(); timeEl.textContent='00:00'; }
+restartBtn.addEventListener('click', ()=> startGame(rows,cols));
+startGame(rows,cols); </script>
+
+</body>
+</html>

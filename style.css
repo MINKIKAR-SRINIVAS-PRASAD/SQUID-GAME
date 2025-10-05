@@ -1,0 +1,205 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Background Image */
+body {
+  background: url("https://cdn4.vectorstock.com/i/1000x1000/89/33/squid-game-circle-triangle-square-vector-39858933.jpg") no-repeat center center fixed;
+  background-size: cover;
+  color: #fff;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+
+/* Dark overlay for readability */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.6); /* overlay */
+  z-index: -1;
+}
+
+/* Header */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #111;
+  padding: 20px 40px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo img {
+  width: 40px;
+  margin-right: 10px;
+}
+
+.logo span {
+  font-size: 24px;
+  color: #ff5a7d;
+  font-weight: bold;
+}
+
+nav a {
+  color: #fff;
+  text-decoration: none;
+  margin-left: 20px;
+  font-weight: 500;
+}
+
+/* Main Layout */
+main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+/* Welcome and Form Boxes */
+.welcome-box, .form-box {
+  background-color: #111;
+  padding: 40px;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(255, 90, 125, 0.2);
+}
+
+.welcome-box h1,
+.form-box h2 {
+  color: #ff2e77;
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+.welcome-box p {
+  font-size: 18px;
+  margin-bottom: 30px;
+}
+
+/* Forms */
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+form input {
+  padding: 12px 15px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+/* Neon Pulse Button Animation */
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 46, 119, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 46, 119, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 46, 119, 0); }
+}
+
+/* Buttons */
+button, form button {
+  background-color: #ff2e77;
+  color: white;
+  border: none;
+  padding: 14px 30px;
+  font-size: 16px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  animation: pulse 2s infinite;
+}
+
+button:hover, form button:hover {
+  background-color: #ff1a63;
+  box-shadow: 0 0 15px #ff2e77, 0 0 30px #ff2e77;
+  transform: scale(1.05);
+}
+
+/* Glowing effect on hover */
+button::after, form button::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,46,119,0.5) 0%, transparent 80%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s;
+  z-index: 0;
+}
+
+button:hover::after, form button:hover::after {
+  opacity: 1;
+}
+
+/* Ensure button text is above the glow effect */
+button span, form button span {
+  position: relative;
+  z-index: 1;
+}
+
+/* Scroll-triggered Animations */
+@keyframes fadeInTop {
+  from { opacity: 0; transform: translateY(-30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(50px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.scroll-animate {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.scroll-animate.visible {
+  opacity: 1;
+  transform: translateY(0);
+  animation-fill-mode: forwards;
+}
+
+.fade-in-top.visible {
+  animation: fadeInTop 1s ease-out forwards;
+}
+
+.slide-up-fade.visible {
+  animation: slideUpFade 1.2s ease-out forwards;
+}
+
+.fade-in-delay.visible {
+  animation: fadeInTop 1s ease-out forwards;
+  animation-delay: 0.3s;
+}
+
+.fade-in-delay-2.visible {
+  animation: fadeInTop 1s ease-out forwards;
+  animation-delay: 0.6s;
+}
+
+.fade-in-delay-3.visible {
+  animation: fadeInTop 1s ease-out forwards;
+  animation-delay: 0.9s;
+}
